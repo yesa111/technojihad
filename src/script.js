@@ -176,36 +176,25 @@ const bakedMaterial = new THREE.MeshBasicMaterial({ map: bakedTexture })
 /**
  * Model
  */
+let mixer = null
 gltfLoader.load(
     './models/Gameboy/gameboy_animated.glb',
     (gltf) =>
-    {
-        // Modelin materyalini uygula
-        gltf.scene.traverse((child) => {
-            if (child.isMesh) {
-                child.material = bakedMaterial
-            }
+    {   
+        gltf.scene.traverse((child) =>
+        {
+            child.material = bakedMaterial
         })
+        mixer = new THREE.AnimationMixer(gltf.scene)
+        const actionSign = mixer.clipAction(gltf.animations[8])
+        const actionMario = mixer.clipAction(gltf.animations[6])
+        const actionGumba = mixer.clipAction(gltf.animations[7])
+        
+        actionSign.play()
+        actionMario.play()
+        actionGumba.play()
 
-        // Modeli ortalamak için bounding box hesapla
-        const box = new THREE.Box3().setFromObject(gltf.scene)
-        const center = new THREE.Vector3()
-        box.getCenter(center)
-        gltf.scene.position.sub(center) // Modeli merkezde (0,0,0) olacak şekilde taşı
-
-        // Modeli sahneye ekle
         scene.add(gltf.scene)
-
-        // Kamera ayarları: Modelin tamamı görünsün
-        // Modelin boyutları: 14.57m x 2.57m (en x boy)
-        const size = new THREE.Vector3()
-        box.getSize(size)
-        // Kamerayı modelin önüne ve biraz yukarıya yerleştir
-        const cameraDistance = size.x * 1.2 // Modelin genişliğinin 1.2 katı kadar uzakta
-        camera.position.set(0, size.y * 0.5, cameraDistance)
-        camera.lookAt(0, 0, 0)
-        controls.target.set(0, 0, 0)
-        controls.update()
     }
 )
 
@@ -243,12 +232,12 @@ const cameraGroup = new THREE.Group()
 scene.add(cameraGroup)
 
 // Base camera
-const camera = new THREE.PerspectiveCamera(5, sizes.width / sizes.height, 0.1, 10)
+const camera = new THREE.PerspectiveCamera(35, sizes.width / sizes.height, 0.1, 100)
 camera.position.set(20, 2, 1)
 const initialPosition = new THREE.Vector3(20, 2, 1)
 const inspectPosition = new THREE.Vector3(20, 2, 6)
 const gamePosition = new THREE.Vector3(10, 2, 1)
-const initialPositionGroup = cameraGroup.position.clone()S
+const initialPositionGroup = cameraGroup.position.clone()
 cameraGroup.add(camera)
 
 
@@ -594,6 +583,11 @@ const tick = () =>
     // Animate camera
     if(mode === 'menu')
     {   
+        // Update mixer
+        if(mixer !== null)
+        {
+            mixer.update(deltaTime)
+        }
         for(const point of pointsInspect)
         {
             point.element.classList.remove('visible')
@@ -693,6 +687,11 @@ const tick = () =>
         const parallaxY = - cursor.y * 1.5
         cameraGroup.position.z += (parallaxX - cameraGroup.position.z) * 5 * deltaTime
         cameraGroup.position.y += (parallaxY - cameraGroup.position.y) * 5 * deltaTime
+        // Update mixer
+        if(mixer !== null)
+        {
+            mixer.update(deltaTime)
+        }
         for(const point of pointsMenu)
         {
             point.element.classList.remove('visible')
