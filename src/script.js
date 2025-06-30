@@ -232,12 +232,12 @@ const cameraGroup = new THREE.Group()
 scene.add(cameraGroup)
 
 // Base camera
-const camera = new THREE.PerspectiveCamera(35, sizes.width / sizes.height, 0.1, 100)
+const camera = new THREE.PerspectiveCamera(5, sizes.width / sizes.height, 0.1, 10)
 camera.position.set(20, 2, 1)
 const initialPosition = new THREE.Vector3(20, 2, 1)
 const inspectPosition = new THREE.Vector3(20, 2, 6)
 const gamePosition = new THREE.Vector3(10, 2, 1)
-const initialPositionGroup = cameraGroup.position.clone()
+const initialPositionGroup = cameraGroup.position.clone()S
 cameraGroup.add(camera)
 
 
